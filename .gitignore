@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.vscode/
+
+# Arduino
+build/
+*.hex
+*.elf
+
+# Models & Data (Nên để link tải thay vì up trực tiếp vì file rất nặng)
+models/*.engine
+models/*.npy
+*.zip
+*.rar
+*.docx
+*.md_backup
+
+# System
+.DS_Store
+Thumbs.db
