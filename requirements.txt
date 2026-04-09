@@ -1,0 +1,6 @@
+# Typical packages to install on Jetson (JetPack 4.6, Python 3.6)
+numpy
+opencv-python
+pycuda
+# TensorRT Python bindings are provided by the JetPack/TensorRT installer and
+# should match the system installation; do NOT pip-install a mismatched tensorrt.
