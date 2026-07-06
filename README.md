@@ -1,76 +1,125 @@
-# Autonomous Waste Sorting Delta Robot with Edge AI (YOLOv8 & Jetson Nano)
+# AI Vision Delta Robot Waste Sorting
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
-[![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](requirements.txt)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Jetson%20Nano-lightgrey.svg)]()
+Graduation thesis project for a vision-guided Delta Robot waste sorting prototype.
+The system combines a Jetson Nano host for object detection with an Arduino Mega
+2560 controller for inverse kinematics, serial communication, homing, and
+stepper-motor motion control.
 
-An end-to-end industrial-grade robotics system featuring real-time object detection, stable tracking, and high-speed Delta robot manipulation. This repository contains both the Python-based host system (GUI, computer vision, Kalman filters) and the Arduino Mega 2560 microcontroller firmware (inverse kinematics, stepper motor controls).
+This repository is intended as a technical evidence package for embedded
+software, robotics, and C/C++ fresher applications.
 
----
+## What This Project Shows
 
-## 🚀 Key Performance Metrics
+- C++ firmware for Delta Robot inverse kinematics and motion sequencing.
+- UART communication between a Jetson Nano host and Arduino Mega controller at
+  115200 baud.
+- Python-based host application for vision, tracking, serial commands, and GUI.
+- YOLOv8/TensorRT object detection pipeline on embedded edge hardware.
+- Hardware/software debugging across camera input, coordinate mapping, serial
+  transfer, motors, limit switches, and vacuum pickup.
 
-- **Inference Latency:** 89ms (TensorRT INT8 Quantization)
-- **Detection Throughput:** 11.2 FPS on NVIDIA Jetson Nano
-- **Picking Accuracy:** ±3.8mm (Coordinate Transformation Error)
-- **Success Rate:** 82% Autonomous Picking in uncontrolled environments
-- **Cycle Time:** 1.4 seconds per object
+## Measured Prototype Results
 
----
+These results are from controlled thesis/demo tests and should be treated as
+prototype-level measurements, not production specifications.
 
-## 🛠 Tech Stack
+| Area | Result |
+| --- | --- |
+| Detection model | YOLOv8n, 3 classes: metal, paper, plastic |
+| Detection quality | mAP@0.5 around 0.91 in thesis testing |
+| End-to-end demo speed | Around 8 FPS on Jetson Nano prototype setup |
+| Robot repeatability | Around 2-3 mm in controlled tests |
+| Host-to-controller link | UART serial command flow at 115200 baud |
 
-- **AI/CV:** YOLOv8 (Ultralytics), TensorRT, OpenCV, Kalman Filter.
-- **Hardware:** NVIDIA Jetson Nano 4GB, Arduino Mega 2560, Delta Robot (3-Axis).
-- **Communication:** High-speed JSON Serial Protocol (115200 baud) via PySerial.
-- **Control:** Inverse Kinematics (IK), Dynamic Acceleration Profiling, EEPROM Configuration.
+## System Architecture
 
----
+```text
+Camera
+  -> Jetson Nano host
+      -> YOLOv8/TensorRT detection
+      -> coordinate mapping and filtering
+      -> serial command generation
+  -> Arduino Mega 2560
+      -> command parsing
+      -> Delta inverse kinematics
+      -> stepper motion control
+      -> homing, workspace checks, vacuum pickup
+```
 
-## 🌟 Advanced Features
+## Repository Structure
 
-- **Stable Tracking:** Implements a 1D Kalman Filter to suppress coordinate noise, ensuring smooth robot trajectories.
-- **Edge AI Optimization:** Models are optimized with TensorRT to achieve a 2x speedup compared to standard FP32 inference.
-- **Dynamic Motion Profiling:** Distance-aware acceleration control to reduce mechanical vibration and improve motor longevity.
-- **Workspace Protection:** Integrated 3D conical workspace violation checks to prevent mechanical collisions.
+| Path | Purpose |
+| --- | --- |
+| [`firmware/Delta_ver2`](firmware/Delta_ver2) | Arduino Mega firmware, Delta kinematics, motion profiles, homing, and command handling |
+| [`core`](core) | Serial communication and coordinate mapping utilities |
+| [`vision`](vision) | YOLO/TensorRT detector and tracking utilities |
+| [`ui`](ui) | Tkinter GUI for operating and observing the prototype |
+| [`docs`](docs) | Thesis-related technical notes |
+| [`main.py`](main.py) | Host application entry point |
 
----
+## Firmware Highlights
 
-## 📂 Project Structure
+- Finite-state style robot control flow with idle, homing, moving, sorting, and
+  error states.
+- Separate motion profiles for homing, fast movement, precision movement, and
+  smoother movement.
+- Workspace boundary checks before executing robot movement.
+- EEPROM-backed configuration for bin locations, pickup heights, and counters.
+- Limit-switch based homing for the three robot axes.
 
-- [`/firmware`](file:///C:/Users/Thinkpad/.gemini/antigravity/scratch/Delta-Robot-EdgeAI/firmware): Arduino source code with custom Inverse Kinematics solver.
-- [`/ui`](file:///C:/Users/Thinkpad/.gemini/antigravity/scratch/Delta-Robot-EdgeAI/ui): Python-based Tkinter GUI with multi-threaded inference pipeline.
-- [`/core`](file:///C:/Users/Thinkpad/.gemini/antigravity/scratch/Delta-Robot-EdgeAI/core): Robot communication and coordinate mapping modules.
-- [`/vision`](file:///C:/Users/Thinkpad/.gemini/antigravity/scratch/Delta-Robot-EdgeAI/vision): YOLO detector and Kalman tracking modules.
-- [`/docs`](file:///C:/Users/Thinkpad/.gemini/antigravity/scratch/Delta-Robot-EdgeAI/docs): Thesis documentation files and introductions.
+Key files:
 
----
+- [`firmware/Delta_ver2/Delta_ver2.ino`](firmware/Delta_ver2/Delta_ver2.ino)
+- [`firmware/Delta_ver2/DeltaKinematics.cpp`](firmware/Delta_ver2/DeltaKinematics.cpp)
+- [`firmware/Delta_ver2/DeltaKinematics.h`](firmware/Delta_ver2/DeltaKinematics.h)
 
-## 🎥 Demo Video & Full Resources
+## Host Software Highlights
 
-- **[Click here to view Demo & Project Files (Google Drive)](https://drive.google.com/drive/u/1/folders/15FrvZ3mc-QcWxVCQaWBIcRBczue9rxv0)**
-- Includes: Video demo, Research Poster, Thesis PDF, and supplementary datasets.
+- Serial controller wrapper for connect/disconnect, command sending, homing, and
+  movement commands.
+- TensorRT detector wrapper with preprocessing, inference, and postprocessing.
+- GUI layer for running the prototype and monitoring system behavior.
 
----
+Key files:
 
-## 🏗 Setup & Installation
+- [`core/robot_comm.py`](core/robot_comm.py)
+- [`core/mapper.py`](core/mapper.py)
+- [`vision/detector.py`](vision/detector.py)
+- [`vision/tracker.py`](vision/tracker.py)
+- [`ui/main_window.py`](ui/main_window.py)
 
-1. Flash the firmware to Arduino Mega using Arduino IDE (found in [`/firmware`](file:///C:/Users/Thinkpad/.gemini/antigravity/scratch/Delta-Robot-EdgeAI/firmware)).
-2. Install dependencies on your machine or Jetson Nano:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run the system:
-   ```bash
-   python main.py
-   ```
+## Demo and Thesis Materials
 
----
+- Portfolio page: https://9baotran1.github.io/firmware-motion-control-portfolio/
+- Demo and thesis resources: https://drive.google.com/drive/u/1/folders/15FrvZ3mc-QcWxVCQaWBIcRBczue9rxv0
 
-## 📄 License & Contributing
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+The portfolio contains a short demo video, thesis poster, thesis report, and
+project review material.
 
----
-*Developed by Tran Gia Bao as part of a University Thesis Project.*
+## Running the Host Application
 
+The full system requires the physical robot, Arduino Mega firmware, camera, and
+Jetson Nano environment. For code review, the repository can still be inspected
+module by module.
+
+Typical Jetson setup:
+
+```bash
+python -m pip install -r requirements.txt
+python main.py
+```
+
+Notes:
+
+- TensorRT Python bindings should match the JetPack/TensorRT installation on the
+  Jetson device.
+- The Arduino firmware is located in `firmware/Delta_ver2`.
+- Serial communication defaults to 115200 baud.
+
+## Author
+
+Tran Gia Bao
+
+Control Engineering and Automation, International University - VNU-HCM
+
+GitHub: https://github.com/9BaoTran1
